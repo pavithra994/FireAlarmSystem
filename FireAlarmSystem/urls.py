@@ -15,7 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import url
+from sensor_app.views import *
+from auth_app.views import *
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url('service/manage/floor$', manage_floor, name="manage_floor"),
+    url('service/manage/room$', manage_room, name="manage_room"),
+    url('service/manage/sensor$', manage_sensor, name="manage_sensor"),
+    url('service/sensor/all$', all_sensor_status, name="all_sensor_status"),
+    url('services/sensor/(?P<sensorId>[^/]+)/currentStatus$', sensor_readings, name="sensor_readings"),
+
+    url('service/user/login$', login, name="login"),
+
 ]
