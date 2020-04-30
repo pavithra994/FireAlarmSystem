@@ -31,4 +31,6 @@ urlpatterns = [
 
     url('service/user/login$', login, name="login"),
 
+    url('sensors/all$',view_sensors,name="view_sensors")
+
 ]

@@ -25,7 +25,7 @@ SECRET_KEY = '00fet+6ce*ab4e^(j_r7=r6(zu1@o+8msmiuov1y!1any&*+3j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 
 # Application definition
@@ -40,12 +40,25 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'channels',
 
     'sensor_app',
     'auth_app'
 ]
 
 AUTH_USER_MODEL = "auth_app.User"
+
+ASGI_APPLICATION = "FireAlarmSystem.routing.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
 
 
 MIDDLEWARE = [

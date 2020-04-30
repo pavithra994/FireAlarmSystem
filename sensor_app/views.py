@@ -172,3 +172,9 @@ def all_sensor_status(request):
     }
 
     return JsonResponse(responseData, status=200, safe=False)
+
+
+def view_sensors(request):
+    return render(request, 'allsensor.html', {
+        'room_name': "test_channel"
+    })
