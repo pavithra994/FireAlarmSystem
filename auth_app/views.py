@@ -22,6 +22,8 @@ def login(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
+    print(request.data, request.POST)
+
     try:
         User.objects.get(email=email)
     except ObjectDoesNotExist:
@@ -31,7 +33,7 @@ def login(request):
     user = authenticate(email=email, password=password)
 
     if user:
-        token = Token.objects.get_or_create(user=user)
+        token ,e= Token.objects.get_or_create(user=user)
 
         responseData = {
             "message": "successful response",
