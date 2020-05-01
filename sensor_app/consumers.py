@@ -61,7 +61,7 @@ from asgiref.sync import async_to_sync
 
 class SensorConsumer(WebsocketConsumer):
     def connect(self):
-        self.groups_name = "sensors"
+        self.groups_name = "web_client"
         async_to_sync(self.channel_layer.group_add)(
             self.groups_name,
             self.channel_name
@@ -76,18 +76,20 @@ class SensorConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        print(text_data)
         message = text_data_json['message']
 
         async_to_sync(self.channel_layer.group_send)(
             self.groups_name,
             {
-                'type': 'chat_message',
+                'type': 'send_message',
                 'message': message
             }
         )
 
-    def chat_message(self, event):
-        message = event['message']
+    def send_message(self, event):
+        print("send message event: ",event)
+        message = event['text']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
