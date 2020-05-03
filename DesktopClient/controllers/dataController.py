@@ -1,10 +1,10 @@
 import requests
 import json
-from Pyro5.api import expose
+# from Pyro5.api import expose
 from .configurations import SERVICES
+import Pyro4
 
-
-@expose
+@Pyro4.expose
 class FireAlarmController:
     """FireAlarmController class handles as remote server which control sensor api requests and responses"""
     def __init__(self):
@@ -63,7 +63,7 @@ class FireAlarmController:
 
         }
         _response = requests.get(self.fire_alarm_rest_api + SERVICES["ALL_DETAILS"],headers=header)
-        return _response.json()
+        return _response.json()['payload']
 
     def login(self,email,password):
         data = {"email":email, "password":password}
@@ -77,7 +77,7 @@ class FireAlarmController:
             print("login success...")
             return self.token
         else:
-            pass # todo: handle errors
+            False # todo: handle errors
 
     def logout(self):
         self.token = None

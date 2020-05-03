@@ -1,9 +1,9 @@
 """
 This is the test client cli app
 """
-import Pyro5.api
+import Pyro4
 
-fire = Pyro5.api.Proxy("PYRO:FireAlarm@127.0.0.1:9000")
+fire = Pyro4.Proxy("PYRONAME:FireAlarm")
 
 print("#### login ####")
 email = input("Enter your email : ")
