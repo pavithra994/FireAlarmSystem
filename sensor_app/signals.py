@@ -23,19 +23,22 @@ def send_message(event):
 @receiver(post_save, sender=Sensor)
 def sensor_post_save(sender, instance, **kwargs):
     print("sensor post saver triggered")
-    group_name = 'web_client'
+    try:
+        group_name = 'web_client'
 
-    message = {
-        'sensorId': instance.sensorId,
-        'status': instance.sensorStatus,
-    }
-
-    channel_layer = channels.layers.get_channel_layer()
-
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'send_message',
-            'text': message
+        message = {
+            'sensorId': instance.sensorId,
+            'status': instance.sensorStatus,
         }
-    )
+
+        channel_layer = channels.layers.get_channel_layer()
+
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'send_message',
+                'text': message
+            }
+        )
+    except:
+        pass

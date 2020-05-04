@@ -17,6 +17,7 @@ class FireAlarmDashboard(Frame):
     def __init__(self,remoteObj,selectedFloor=None):
         super().__init__()
         self.sensorDetails = remoteObj.get_sensors_updates()
+        self.remoteObj = remoteObj
         print(self.sensorDetails)
         self.intiUI()
         self.selectedFloor = selectedFloor
@@ -90,11 +91,16 @@ class FireAlarmDashboard(Frame):
 
         for w in self.room_list_frame.winfo_children():
             w.destroy()
-        rooms_title_label = Label(self.room_list_frame, text=f"Floor #{floorId} | List of Rooms",width=500)
-        rooms_title_label.pack(fill='x')
+
+        rooms_title_frame = Frame(self.room_list_frame)
+        rooms_title_frame.pack(fill='x',anchor="w")
+        rooms_title_label = Label(rooms_title_frame, text=f"Floor #{floorId} | List of Rooms")
+        rooms_title_label.grid(row=0,column=1,columnspan=4)
+        b = Button(rooms_title_frame, text="Add new room")
+        b.grid(row=0,column=6,sticky=E)
         room_label_list = []
         for r in room_list:
-            room = RoomFrame(self.room_list_frame,roomId=r['roomId'],roomName=r['roomName'],sensorList=r['sensors'],relief=SUNKEN)
+            room = RoomFrame(self.room_list_frame,remoteObj=self.remoteObj,roomId=r['roomId'],roomName=r['roomName'],sensorList=r['sensors'],relief=SUNKEN)
             room.pack(padx=5, pady=5)
             room_label_list.append({"roomId":r['roomId'],"roomFrame":room})
 
@@ -104,14 +110,18 @@ class RoomFrame(Frame):
         self.roomId = kwargs['roomId']
         self.roomName = kwargs['roomName']
         self.sensorList = kwargs['sensorList']
+        self.remoteObj = kwargs['remoteObj']
         self.intiUI()
 
     def intiUI(self):
         self.pack(expand='no', fill='both')
         self.config(bg="green")
-        name_label = Label(self,text=self.roomName,bg="yellow")
-        name_label.pack(anchor="w")
-
+        rooms_title_frame = Frame(self)
+        rooms_title_frame.pack(fill='x')
+        name_label = Label(rooms_title_frame,text=self.roomName,bg="yellow")
+        name_label.grid(row=0,column=1,columnspan=4)
+        b = Button(rooms_title_frame, text="Add new sensor")
+        b.grid(row=0, column=6, sticky=E)
         for s in self.sensorList:
             print(s)
             sensor_frame = Frame(self)
@@ -145,10 +155,16 @@ class RoomFrame(Frame):
             sensor_colour_label = Label(sensor_frame,text=" ",bg=colour_code[s['sensorStatus']],width=2,bd=1)
             sensor_colour_label.grid(row=0,column=2,sticky='w')
 
-            b = Button(sensor_frame,text="edit")
+            b = Button(sensor_frame,text="edit",command=self.edit_sensor)
             b.grid(row=0,column=3,sticky='e')
 
         # l = Label(self,text=self.roomName,bg="white").pack()
+
+    def edit_sensor(self):
+        edit = Tk()
+        x = SensorEditWindow(edit,1,remote=self.remoteObj)
+        edit.mainloop()
+
 
 class LoginWindow(Frame):
     def __init__(self,root):
@@ -200,6 +216,35 @@ class LoginWindow(Frame):
 
         else:
             self.message['text'] = 'Email or password incorrect. Try again'
+
+
+class SensorEditWindow:
+    def __init__(self,root,sensorId,remote):
+        self.root = root
+        self.sensorId =sensorId
+        self.remoteObj = remote
+        self.intiUI()
+
+    def intiUI(self):
+        self.root.title(f"Sensor #{self.sensorId} - Edit")
+
+        f = Frame(self.root)
+        f.grid()
+
+        Label(f,text="Sensor Location : ").grid(row=2,column=1,sticky= W)
+        self.loc = Entry(f)
+        self.loc.grid(row=2,column=2)
+        Label(f,text="Sensor Type : ").grid(row=4,column=1,sticky= W)
+        self.type = StringVar(f)
+        self.type.set("-")
+        OptionMenu(f, self.type, "CO2", "SMOKE", "three", "four").grid(row=4,column=2)
+
+        Button(f, text = 'OK',command = self.edit_sensor ).grid(row=6)
+
+    def edit_sensor(self):
+        if self.type in ['CO2','SMOKE']:
+            self.remoteObj.add_or_edit_sensor()
+
 
 s = sensorDetails = [
                                 {

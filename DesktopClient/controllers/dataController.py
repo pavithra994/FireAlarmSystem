@@ -39,10 +39,11 @@ class FireAlarmController:
         _response = requests.post(self.fire_alarm_rest_api + SERVICES["ADD_ROOM"],data=data,headers=header)
         # todo: handle the rest (errors)
 
-    def add_or_edit_sensor(self,sensor_type,room_id,sensor_id=None):
+    def add_or_edit_sensor(self,sensor_type,room_id=None,sensor_id=None):
         if not self.token:
             pass  # todo: handle the error
-        data = {"roomId": room_id, "sensorType": sensor_type}
+        data = {#"roomId": room_id,
+                "sensorType": sensor_type}
         if sensor_id:
             data["sensorId"] = sensor_id
         header = {
