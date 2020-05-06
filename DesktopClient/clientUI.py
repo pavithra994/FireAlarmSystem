@@ -6,4 +6,6 @@ if __name__ == '__main__':
     window= Tk()
     # window.geometry('425x185+700+300')
     app = LoginWindow(window)
+    window.bind("<Return>",app.test())
+
     window.mainloop()

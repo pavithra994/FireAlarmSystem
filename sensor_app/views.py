@@ -1,10 +1,15 @@
+from django.contrib.auth import authenticate, logout
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
+from sensor_app.forms import LoginForm
 from sensor_app.models import Floor, Room, Sensor
+from rest_framework.authtoken.models import Token
+
 
 @api_view(['POST'])
 def manage_floor(request):
@@ -118,6 +123,7 @@ def manage_sensor(request):
 
 
 @api_view(['POST'])
+@permission_classes((AllowAny,))
 def sensor_readings(request,sensorId):
     """
     POST service **form data
@@ -125,7 +131,7 @@ def sensor_readings(request,sensorId):
     service call : /services/sensor/currentStatus
     """
     try:
-        sensor_obj = Sensor.objects.get(roomId=sensorId)
+        sensor_obj = Sensor.objects.get(sensorId=sensorId)
     except:
         return JsonResponse({"message": "invalid sensor id"}, status=400, safe=False)
 
@@ -178,3 +184,99 @@ def view_sensors(request):
     return render(request, 'allsensor.html', {
         'room_name': "test_channel"
     })
+
+
+def index(request,floorId=None):
+    if not request.user.is_authenticated:
+        print("nonn")
+        return redirect('/login')
+
+    roomQs = Room.objects.all()
+    floorName = None
+    if floorId:
+        roomQs = roomQs.filter(floor__floorId=floorId)
+    floors_list = []
+    for f in Floor.objects.all():
+        try:
+            if f.floorId == int(floorId):
+                floorName = f.floorName
+        except:
+            pass
+        floors_list.append(
+            {
+                "floorName": f.floorName,
+                "floorId": f.floorId,
+                "alert": True
+            }
+        )
+
+    rooms = []
+    for _room in roomQs:
+        sensors = []
+        is_room_alart = False
+        for _sensor in _room.sensor_related.all():
+            if _sensor.sensorStatus > 5:
+                is_room_alart= True
+                for f in floors_list:
+                    if f['floorId'] == _room.floor_id:
+                        f['alert'] = True
+
+            sensors.append(
+                {
+                    "sensorId": _sensor.sensorId,
+                    "sensorType": _sensor.sensorType,
+                    "sensorStatus": _sensor.sensorStatus
+                }
+            )
+        rooms.append(
+            {
+                "roomId": _room.roomId,
+                "roomName": _room.roomName,
+                "floorId": _room.floor_id,
+                "floorName": _room.floor.floorName,
+                "sensors": sensors,
+                "alert":is_room_alart
+            }
+        )
+
+
+    context = {
+        "floorList":floors_list,
+        "rooms":rooms,
+        "selectedFloor":floorId,
+        "selectedFloorName":floorName,
+        "user": request.user.email
+
+    }
+    return render(request,'index.html',context)
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    form = LoginForm(request.POST or None)
+    if form.is_valid():
+        print(form.cleaned_data)
+        email = form.cleaned_data.get('email')
+        password = form.cleaned_data.get('password')
+        user = authenticate(request, username=email, password=password)
+
+        if user:
+            print("auth...")
+            token, e = Token.objects.get_or_create(user=user)
+            response = redirect('home')
+            response['Authorization'] = f"Token {token.key}"
+            return response
+        else:
+            return redirect('/')
+
+
+    context = {
+        "form":form
+    }
+    return render(request,'login.html',context)
+
+
+def log_out(request):
+    logout(request)
+    return redirect('/login')

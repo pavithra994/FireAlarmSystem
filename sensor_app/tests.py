@@ -18,4 +18,11 @@ for i in Floor.objects.all():
             sens.sensorStatus = random.randint(1,10)
             sens.save()
 
+import random
+from sensor_app.models import *
+
+
+for i in Sensor.objects.all():
+    i.sensorStatus = random.randint(1,5)
+    i.save()
 

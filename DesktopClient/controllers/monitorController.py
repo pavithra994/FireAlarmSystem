@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 from tkinter import ttk
 """
@@ -14,11 +15,16 @@ ____________________|   -----------------------------------
 
 """
 class FireAlarmDashboard(Frame):
-    def __init__(self,remoteObj,selectedFloor=None):
+    def __init__(self,remoteObj,selectedFloor=None,email=None):
         super().__init__()
         self.sensorDetails = remoteObj.get_sensors_updates()
         self.remoteObj = remoteObj
         print(self.sensorDetails)
+        self.master.title(f'Fire Alarm | Dashboard - User: {email}')
+        self.master.bind("<Return>", self.refresh)
+        # Root frame
+        # self.pack(expand='yes',fill='both')
+        self.grid(sticky=E + W + S + N)
         self.intiUI()
         self.selectedFloor = selectedFloor
         if selectedFloor:
@@ -36,10 +42,7 @@ class FireAlarmDashboard(Frame):
         self.rooms_label_list = []  # list of{"roomId":12,"roomFrame":FrameObj}
 
 
-        self.master.title('Fire Alarm | Dashboard')
-        # Root frame
-        # self.pack(expand='yes',fill='both')
-        self.grid(sticky=E+W+S+N)
+
         floor_list_frame = Frame(self,width=20,bd=1, relief=RIDGE)
         floor_list_frame.pack(anchor="w",side=LEFT,expand='no',fill='y')
         floor_list_frame.config(background='ghost white')
@@ -48,6 +51,7 @@ class FireAlarmDashboard(Frame):
 
         l = Label(floor_list_frame,text="Floors list",bg="saddle brown",width=20)
         l.pack()
+
 
 
         for f in self.sensorDetails:
@@ -80,6 +84,7 @@ class FireAlarmDashboard(Frame):
                 l['floorLabel'].config(bg="seashell4",relief=SUNKEN)
 
 
+
     def load_rooms(self,floorId=None):
         # todo: get room list from all status service by floor id
         for f in self.sensorDetails:
@@ -104,6 +109,13 @@ class FireAlarmDashboard(Frame):
             room.pack(padx=5, pady=5)
             room_label_list.append({"roomId":r['roomId'],"roomFrame":room})
 
+    def refresh(self,event=None):
+        print("rr")
+        self.sensorDetails = self.remoteObj.get_sensors_updates()
+        self.floor_label_click(id=self.selectedFloor)
+
+
+
 class RoomFrame(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self,parent)
@@ -115,7 +127,7 @@ class RoomFrame(Frame):
 
     def intiUI(self):
         self.pack(expand='no', fill='both')
-        self.config(bg="green")
+        # self.config(bg="green")
         rooms_title_frame = Frame(self)
         rooms_title_frame.pack(fill='x')
         name_label = Label(rooms_title_frame,text=self.roomName,bg="yellow")
@@ -210,13 +222,16 @@ class LoginWindow(Frame):
         fire = Pyro4.Proxy("PYRONAME:FireAlarm")
         # if fire.login(self.username.get(),self.password.get()):
         if fire.login('admin@test.lk','password'):
+            em = self.username.get()
             self.destroy()
             self.root.geometry("720x720")
-            app = FireAlarmDashboard(fire)
+            app = FireAlarmDashboard(fire,email=em)
 
         else:
             self.message['text'] = 'Email or password incorrect. Try again'
 
+    def test(self):
+        print("NNN")
 
 class SensorEditWindow:
     def __init__(self,root,sensorId,remote):

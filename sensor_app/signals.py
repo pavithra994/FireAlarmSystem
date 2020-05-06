@@ -29,6 +29,11 @@ def sensor_post_save(sender, instance, **kwargs):
         message = {
             'sensorId': instance.sensorId,
             'status': instance.sensorStatus,
+            'type': instance.sensorType,
+            'roomId': instance.room.roomId,
+            'roomName': instance.room.roomName,
+            'floorId': instance.room.floor.floorId,
+            'floorName': instance.room.floor.floorName,
         }
 
         channel_layer = channels.layers.get_channel_layer()
@@ -40,5 +45,5 @@ def sensor_post_save(sender, instance, **kwargs):
                 'text': message
             }
         )
-    except:
-        pass
+    except Exception as e:
+        print("Socket Error 1 : ",e)

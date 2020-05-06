@@ -23,6 +23,10 @@ from auth_app.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', index, name="home"),
+    path('login', login_view, name="login_view"),
+    path('logout', log_out, name="logout_view"),
+    url('floor/(?P<floorId>[^/]+)$', index, name="floor"),
     url('service/manage/floor$', manage_floor, name="manage_floor"),
     url('service/manage/room$', manage_room, name="manage_room"),
     url('service/manage/sensor$', manage_sensor, name="manage_sensor"),
