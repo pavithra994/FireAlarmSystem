@@ -1,6 +1,8 @@
 import time
 from tkinter import *
 from tkinter import ttk
+import threading
+
 """
 ___________________________________________________________
 Fire Alarm Window                                  - | x  
@@ -68,6 +70,8 @@ class FireAlarmDashboard(Frame):
         rooms_title_label.pack(fill='x')
         # b1 = RoomFrame(room_list_frame,floorId=2)
         # b1.pack()
+        new_tread = threading.Thread(target=self.auto_refresh)
+        new_tread.start()
 
     def floor_label_click(self,event=None,id=None):
         print(id)
@@ -113,6 +117,11 @@ class FireAlarmDashboard(Frame):
         print("rr")
         self.sensorDetails = self.remoteObj.get_sensors_updates()
         self.floor_label_click(id=self.selectedFloor)
+
+    def auto_refresh(self):
+        while True:
+            time.sleep(10)
+            self.refresh()
 
 
 

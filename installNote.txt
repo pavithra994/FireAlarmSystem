@@ -6,6 +6,8 @@ python manage.py runserver
 # run Remote Server (PyRo) - PYRONAME:FireAlarm@localhost:9090
 
 cd DesktopClient
+
+python -m Pyro4.naming      - run naming server
 python mainServer.py        - run remote server
 python clientUI.py          - run client application
 
